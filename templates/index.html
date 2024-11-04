@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <style>
+        /* Basic styling for the chatbot interface */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+
+        #chatbox {
+            width: 60%;
+            max-width: 600px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            overflow-y: auto;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+
+        #user-input {
+            width: 60%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+        }
+
+        .message {
+            margin: 5px 0;
+        }
+
+        .user-message {
+            color: blue;
+            text-align: right;
+        }
+
+        .bot-message {
+            color: green;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h2>Chatbot Interface</h2>
+    <div id="chatbox"></div>
+    <input type="text" id="user-input" placeholder="Ask the chatbot...">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        async function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            if (!userInput.trim()) return;
+    
+            // Display user message in the chatbox
+            const chatbox = document.getElementById('chatbox');
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('message', 'user-message');
+            userMessage.innerHTML = `<strong>You:</strong> ${userInput}`;
+            chatbox.appendChild(userMessage);
+    
+            // Clear the input field
+            document.getElementById('user-input').value = '';
+    
+            // Display loading indicator
+            const botMessage = document.createElement('div');
+            botMessage.classList.add('message', 'bot-message');
+            botMessage.innerHTML = "Chatbot: <em>Processing...</em>";
+            chatbox.appendChild(botMessage);
+    
+            // Scroll to the bottom of the chatbox
+            chatbox.scrollTop = chatbox.scrollHeight;
+    
+            // Send the message to the backend
+            try {
+                const response = await fetch('http://127.0.0.1:5000/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: userInput })
+                });
+                const data = await response.json();
+    
+                // Update bot message with actual response
+                botMessage.innerHTML = `<strong>Chatbot:</strong> ${data.response}`;
+                chatbox.scrollTop = chatbox.scrollHeight;
+            } catch (error) {
+                console.error("Error:", error);
+                botMessage.innerHTML = "<strong> Chatbot:</strong> Sorry, there was an error processing your request.";
+            }
+        }
+    </script>
+</body>
+</html>
